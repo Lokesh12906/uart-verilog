@@ -2,200 +2,158 @@
 
 ## Overview
 
-This project implements a Universal Asynchronous Receiver Transmitter (UART) in Verilog HDL. The design includes a UART Transmitter (TX), UART Receiver (RX), and a Baud Rate Generator. Communication is verified using a loopback testbench where transmitted data is directly connected to the receiver.
-
-The project demonstrates finite state machine (FSM) design, serial communication protocols, synchronous digital design, and RTL verification using simulation.
-
----
+This project implements a Universal Asynchronous Receiver Transmitter (UART) in Verilog HDL. The design consists of a UART Transmitter (TX), UART Receiver (RX), and Baud Rate Generator. A loopback testbench is used to verify successful serial communication between the transmitter and receiver.
 
 ## Features
 
-* UART Transmitter (TX)
-* UART Receiver (RX)
+* FSM-based UART Transmitter
+* FSM-based UART Receiver
 * Baud Rate Generator
-* FSM-based architecture
-* Start bit and stop bit framing
-* 8-bit data transmission
-* LSB-first serial transmission
-* Loopback verification through simulation
-* VCD waveform generation for analysis
-
----
+* 8-bit UART Communication
+* Start and Stop Bit Framing
+* LSB-First Data Transmission
+* Loopback Verification through Simulation
+* GTKWave Waveform Analysis
 
 ## Project Structure
 
 ```text
-uart/
+uart-verilog/
 │
-├── uart_tx.v      // UART transmitter
-├── uart_rx.v      // UART receiver
-├── baud_gen.v     // Baud rate generator
-├── uart_tb.v      // Testbench
-├── uart.vcd       // Simulation waveform
-└── README.md
+├── rtl/
+│   ├── uart_tx.v
+│   ├── uart_rx.v
+│   └── baud_gen.v
+│
+├── tb/
+│   └── uart_tb.v
+│
+├── screenshots/
+│   └── uart_waveform.png
+│
+├── README.md
+└── .gitignore
 ```
-
----
 
 ## UART Frame Format
 
-Each transmitted frame consists of:
-
 ```text
-| Start Bit | 8 Data Bits | Stop Bit |
-|     0     |  LSB First  |     1    |
+| Start | Data[7:0] | Stop |
+|   0   | LSB First |  1   |
 ```
 
-Example for transmitting:
+Example transmission:
 
 ```text
-0xAA = 10101010
+Input Byte : 0xAA
+Binary     : 10101010
+
+Serial Data:
+0 | 0 1 0 1 0 1 0 1 | 1
 ```
-
-UART serial stream:
-
-```text
-Start  Data Bits (LSB→MSB)  Stop
-
-  0    0 1 0 1 0 1 0 1      1
-```
-
----
 
 ## Module Description
 
-### 1. Baud Rate Generator
+### Baud Rate Generator
 
-Generates a periodic baud tick used to synchronize transmission and reception.
+Generates periodic baud ticks used to synchronize UART transmission and reception.
 
-**Inputs**
+### UART Transmitter
 
-* `clk`
-* `reset`
-
-**Outputs**
-
-* `baud_tick`
-
----
-
-### 2. UART Transmitter
-
-Implements serial data transmission using a finite state machine.
-
-#### States
+Finite State Machine:
 
 ```text
 IDLE → START → DATA → STOP → IDLE
 ```
 
-#### Inputs
+Responsibilities:
 
-* `clk`
-* `reset`
-* `baud_tick`
-* `data_in[7:0]`
-* `data_ready`
+* Latches input data
+* Generates UART frame
+* Transmits data serially (LSB first)
 
-#### Outputs
+### UART Receiver
 
-* `tx_serial`
-* `tx_busy`
-
----
-
-### 3. UART Receiver
-
-Receives serial data and reconstructs the original byte.
-
-#### States
+Finite State Machine:
 
 ```text
 IDLE → DATA → STOP → IDLE
 ```
 
-#### Inputs
+Responsibilities:
 
-* `clk`
-* `reset`
-* `baud_tick`
-* `rx_serial`
+* Detects start bit
+* Receives serial data
+* Reconstructs the transmitted byte
+* Generates data valid signal
 
-#### Outputs
+## Simulation Results
 
-* `data_out[7:0]`
-* `data_valid`
-
----
-
-## Simulation
-
-The testbench performs loopback communication:
+Loopback connection:
 
 ```verilog
 assign rx_serial = tx_serial;
 ```
 
-Test data:
+Test Data:
 
 ```verilog
 data_in = 8'b10101010;
 ```
 
-Expected result:
+Result:
 
 ```text
-Transmitted : 10101010
-Received    : 10101010
+Transmitted Data : 0xAA
+Received Data    : 0xAA
+Status           : PASS
 ```
 
-Simulation output:
+### Waveform
 
-```text
-data_valid = 1
-data_out   = 10101010
-```
+![UART Waveform](screenshots/uart_waveform.png)
 
-This confirms successful UART transmission and reception.
+The waveform confirms successful UART transmission and reception through loopback testing.
 
----
+## Running the Simulation
 
-## How to Run
-
-### Compile
+Compile:
 
 ```bash
-iverilog -o tb_uart.vvp uart_tb.v uart_tx.v uart_rx.v baud_gen.v
+iverilog -o tb_uart.vvp tb/uart_tb.v rtl/*.v
 ```
 
-### Simulate
+Run:
 
 ```bash
 vvp tb_uart.vvp
 ```
 
-### View Waveforms
+Open Waveform:
 
 ```bash
 gtkwave uart.vcd
 ```
 
----
-
 ## Concepts Demonstrated
 
+* Verilog HDL
+* RTL Design
 * Finite State Machines (FSMs)
 * Serial Communication Protocols
-* Verilog RTL Design
-* Synchronous Sequential Logic
-* Baud Rate Generation
-* Digital System Verification
 * Testbench Development
+* Digital System Verification
 
----
+## Future Improvements
+
+* Parity Bit Support
+* Configurable Baud Rate
+* FIFO Buffers
+* Framing Error Detection
+* Oversampling-Based Receiver
 
 ## Author
 
-Lokesh Kumar
+**Lokesh Kumar**
 
 Developed as a digital design project to strengthen Verilog HDL, FSM design, and communication protocol implementation skills.
