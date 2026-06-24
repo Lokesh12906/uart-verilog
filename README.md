@@ -144,13 +144,6 @@ gtkwave uart.vcd
 * Testbench Development
 * Digital System Verification
 
-## Future Improvements
-
-* Parity Bit Support
-* Configurable Baud Rate
-* FIFO Buffers
-* Framing Error Detection
-* Oversampling-Based Receiver
 
 ## Author
 
